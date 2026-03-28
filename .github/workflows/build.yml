@@ -12,10 +12,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build --allow-unauthenticated
       - name: Apply Aaron's mods
         run: bash apply_aaron_mods.sh
-      - name: Bootstrap toolchain and build
-        run: python3 dbt.py exec -- bash -c "python3 dbt.py configure && python3 dbt.py build && echo BUILD_DONE"
+      - name: Build with dbt
+        run: python3 dbt.py exec -- python3 dbt.py build
       - name: Find firmware files
-        run: find . -not -path './.git/*' -name '*.bin' -o -name '*.elf' -o -name '*.hex'
+        run: find . -not -path './.git/*' -not -path './toolchain/*' \( -name '*.bin' -o -name '*.elf' \)
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
