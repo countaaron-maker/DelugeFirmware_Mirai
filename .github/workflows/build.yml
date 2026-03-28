@@ -12,8 +12,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build --allow-unauthenticated
       - name: Apply Aaron's mods
         run: bash apply_aaron_mods.sh
-      - name: Build with dbt
-        run: python3 dbt.py exec -- python3 dbt.py build
+      - name: Build release firmware
+        run: python3 dbt.py exec -- python3 dbt.py build release
       - name: Find firmware files
         run: find . -not -path './.git/*' -not -path './toolchain/*' \( -name '*.bin' -o -name '*.elf' \)
       - name: Upload firmware
