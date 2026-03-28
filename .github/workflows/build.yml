@@ -1,28 +1,21 @@
 name: Build Aaron's Firmware
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Ninja
         run: sudo apt-get update && sudo apt-get install -y ninja-build --allow-unauthenticated
-
       - name: Apply Aaron's mods
         run: bash apply_aaron_mods.sh
-
       - name: Bootstrap toolchain and build
-        run: python3 dbt.py exec -- bash -c "python3 dbt.py configure && python3 dbt.py build"
-
-      - name: Find the bin file
-        run: find . -name "*.bin" 2>/dev/null
-
+        run: python3 dbt.py exec -- bash -c "python3 dbt.py configure && python3 dbt.py build && echo BUILD_DONE"
+      - name: Find firmware files
+        run: find . -not -path './.git/*' -name '*.bin' -o -name '*.elf' -o -name '*.hex'
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
