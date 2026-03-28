@@ -670,8 +670,9 @@ doActualSimpleChange:
 				goto changeOutputType;
 			}
 			else {
-				if (clip && clip->type == ClipType::INSTRUMENT) {
-					InstrumentClip* instrumentClip = (InstrumentClip*)clip;
+				Clip* currentClip = getCurrentClip();
+				if (currentClip && currentClip->type == ClipType::INSTRUMENT) {
+					InstrumentClip* instrumentClip = (InstrumentClip*)currentClip;
 					Instrument* instrument = (Instrument*)instrumentClip->output;
 					actionLogger.deleteAllLogs();
 					currentUIMode = UI_MODE_NONE;
