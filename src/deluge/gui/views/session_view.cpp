@@ -663,14 +663,22 @@ doActualSimpleChange:
 		goto changeOutputType;
 	}
 	else if (b == MIDI) {
-		// AARON MOD: MIDI -> Samples (Shift+MIDI = original)
+		// AARON MOD: MIDI -> Sample file browser (Shift+MIDI = original)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::MIDI_OUT;
 				goto changeOutputType;
 			}
 			else {
-				display->displayPopup("SAMPLES");
+				if (clip && clip->type == ClipType::INSTRUMENT) {
+					InstrumentClip* instrumentClip = (InstrumentClip*)clip;
+					Instrument* instrument = (Instrument*)instrumentClip->output;
+					actionLogger.deleteAllLogs();
+					currentUIMode = UI_MODE_NONE;
+					selectedClipYDisplay = 255;
+					loadInstrumentPresetUI.setupLoadInstrument(OutputType::KIT, instrument, nullptr);
+					openUI(&loadInstrumentPresetUI);
+				}
 			}
 		}
 	}
@@ -682,8 +690,8 @@ doActualSimpleChange:
 				goto changeOutputType;
 			}
 			else {
-				display->displayPopup("AUDIO CLIP");
-				createNewAudioClipQuick(currentSong, selectedClipYDisplay);
+				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
+				setupTrackCreation();
 			}
 		}
 	}
