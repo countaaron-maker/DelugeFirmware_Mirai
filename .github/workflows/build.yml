@@ -11,20 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Ninja
-        run: sudo apt-get update && sudo apt-get install -y ninja-build --allow-unauthenticated
-
-      - name: Download ARM toolchain
-        run: |
-          wget -q https://developer.arm.com/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz
-          tar xf arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz
-          mkdir -p toolchain/v22/linux-x86_64/arm-none-eabi-gcc
-          cp -r arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi/* toolchain/v22/linux-x86_64/arm-none-eabi-gcc/
+      - name: Install Ninja and Python deps
+        run: sudo apt-get update && sudo apt-get install -y ninja-build python3-pip --allow-unauthenticated
 
       - name: Apply Aaron's mods
         run: bash apply_aaron_mods.sh
 
-      - name: Configure
+      - name: Configure (dbt downloads toolchain automatically)
         run: python3 dbt.py configure
 
       - name: Build
