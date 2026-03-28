@@ -663,12 +663,29 @@ doActualSimpleChange:
 		goto changeOutputType;
 	}
 	else if (b == MIDI) {
-		newOutputType = OutputType::MIDI_OUT;
-		goto changeOutputType;
+		// AARON MOD: MIDI -> Samples (Shift+MIDI = original)
+		if (on) {
+			if (Buttons::isShiftButtonPressed()) {
+				newOutputType = OutputType::MIDI_OUT;
+				goto changeOutputType;
+			}
+			else {
+				display->displayPopup("SAMPLES");
+			}
+		}
 	}
 	else if (b == CV) {
-		newOutputType = OutputType::CV;
-		goto changeOutputType;
+		// AARON MOD: CV -> New Audio Clip (Shift+CV = original)
+		if (on) {
+			if (Buttons::isShiftButtonPressed()) {
+				newOutputType = OutputType::CV;
+				goto changeOutputType;
+			}
+			else {
+				display->displayPopup("AUDIO CLIP");
+				createNewAudioClipQuick(currentSong, selectedClipYDisplay);
+			}
+		}
 	}
 	else if (b == KEYBOARD) {
 		if (on && (currentUIMode == UI_MODE_NONE)) {
