@@ -192,6 +192,40 @@ void SessionView::focusRegained() {
 	}
 }
 
+
+// AARON MOD: helper — creates audio clip on current row and prompts input select
+// Called when CV button is pressed without Shift.
+// Replaces the multi-step process documented in the manual:
+// "Make a new clip, hold pad, click Select, use Learn+Row Pad..."
+static void createNewAudioClipQuick(Song* song, int currentTrackIndex) {
+    if (!song) return;
+    // Create audio clip on the active row
+    Clip* newClip = song->createNewClip(ClipType::AUDIO, currentTrackIndex);
+    if (!newClip) return;
+    AudioClip* audioClip = static_cast<AudioClip*>(newClip);
+    // Default: stereo line in, always monitoring
+    audioClip->inputChannel = AudioInputChannel::MIX;
+    audioClip->monitoringType = MonitoringType::ALWAYS;
+    // Tell user what just happened and what to do next
+    display->displayPopup("AUDIO CLIP");
+    // Brief pause then show instruction
+    // (user will use Learn + Row Pad to select input source)
+}
+
+
+// AARON MOD: helper — opens slice menu for the currently active sample.
+// Called when LEARN button is pressed without Shift.
+// Original LEARN behavior preserved on Shift+LEARN.
+static void openSliceMenuDirect() {
+    if (!currentSong) return;
+    Clip* clip = currentSong->getCurrentClip();
+    if (!clip) return;
+    // Open the slicer UI — same as navigating into sample editor and
+    // pressing the slice option, but in one button press.
+    openUI(&slicer);
+    display->displayPopup("SLICE");
+}
+
 ActionResult SessionView::buttonAction(deluge::hid::Button b, bool on, bool inCardRoutine) {
 	using namespace deluge::hid::button;
 
