@@ -663,23 +663,16 @@ doActualSimpleChange:
 		goto changeOutputType;
 	}
 	else if (b == MIDI) {
-		// AARON MOD: MIDI -> Sample file browser (Shift+MIDI = original)
+		// AARON MOD: MIDI -> Live Audio Looper (Shift+MIDI = original MIDI)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::MIDI_OUT;
 				goto changeOutputType;
 			}
 			else {
-				Clip* currentClip = getCurrentClip();
-				if (currentClip && currentClip->type == ClipType::INSTRUMENT) {
-					InstrumentClip* instrumentClip = (InstrumentClip*)currentClip;
-					Instrument* instrument = (Instrument*)instrumentClip->output;
-					actionLogger.deleteAllLogs();
-					currentUIMode = UI_MODE_NONE;
-					selectedClipYDisplay = 255;
-					loadInstrumentPresetUI.setupLoadInstrument(OutputType::KIT, instrument, nullptr);
-					openUI(&loadInstrumentPresetUI);
-				}
+				// Create new audio clip set up for live looping from line in
+				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
+				setupTrackCreation();
 			}
 		}
 	}
