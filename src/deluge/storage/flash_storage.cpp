@@ -331,7 +331,7 @@ void resetSettings() {
 
 	defaultBendRange[BEND_RANGE_MAIN] = 2;
 
-	defaultSessionLayout = SessionLayoutType::SessionLayoutTypeRows;
+	defaultSessionLayout = SessionLayoutType::SessionLayoutTypeGrid;
 	defaultKeyboardLayout = KeyboardLayoutType::KeyboardLayoutTypeIsomorphic;
 
 	defaultFavouritesLayout = FavouritesDefaultLayoutFavorites;
@@ -610,7 +610,7 @@ void readSettings() {
 	AudioEngine::metronome.setVolume(defaultMetronomeVolume);
 
 	if (buffer[123] >= util::to_underlying(SessionLayoutTypeMaxElement)) {
-		defaultSessionLayout = SessionLayoutType::SessionLayoutTypeRows;
+		defaultSessionLayout = SessionLayoutType::SessionLayoutTypeGrid;
 	}
 	else {
 		defaultSessionLayout = static_cast<SessionLayoutType>(buffer[123]);
