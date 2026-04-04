@@ -663,7 +663,7 @@ doActualSimpleChange:
 		goto changeOutputType;
 	}
 	else if (b == MIDI) {
-		// AARON MOD: MIDI -> New Audio Clip for live looping (Shift+MIDI = original MIDI)
+		// AARON MOD: MIDI -> New Audio Clip instantly (Shift+MIDI = original MIDI)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::MIDI_OUT;
@@ -671,14 +671,19 @@ doActualSimpleChange:
 			}
 			else {
 				if (inCardRoutine) return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
-				currentUIMode = UI_MODE_CREATING_CLIP;
-				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
-				clipCreationButtonPressed(deluge::hid::button::SELECT_ENC, true, inCardRoutine);
+				int32_t yDisplay = (selectedClipYDisplay < kDisplayHeight) ? selectedClipYDisplay
+				                   : std::min((int32_t)currentSong->sessionClips.getNumElements(),
+				                              (int32_t)kDisplayHeight - 1);
+				Clip* newClip = createNewClip(OutputType::AUDIO, yDisplay);
+				if (newClip) {
+					display->displayPopup("AUDIO CLIP");
+					requestRendering(this, 0xFFFFFFFF, 0xFFFFFFFF);
+				}
 			}
 		}
 	}
 	else if (b == CV) {
-		// AARON MOD: CV -> New Audio Clip for loading loops (Shift+CV = original)
+		// AARON MOD: CV -> New Audio Clip instantly (Shift+CV = original)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::CV;
@@ -686,9 +691,14 @@ doActualSimpleChange:
 			}
 			else {
 				if (inCardRoutine) return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
-				currentUIMode = UI_MODE_CREATING_CLIP;
-				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
-				clipCreationButtonPressed(deluge::hid::button::SELECT_ENC, true, inCardRoutine);
+				int32_t yDisplay = (selectedClipYDisplay < kDisplayHeight) ? selectedClipYDisplay
+				                   : std::min((int32_t)currentSong->sessionClips.getNumElements(),
+				                              (int32_t)kDisplayHeight - 1);
+				Clip* newClip = createNewClip(OutputType::AUDIO, yDisplay);
+				if (newClip) {
+					display->displayPopup("AUDIO CLIP");
+					requestRendering(this, 0xFFFFFFFF, 0xFFFFFFFF);
+				}
 			}
 		}
 	}
