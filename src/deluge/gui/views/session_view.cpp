@@ -663,29 +663,32 @@ doActualSimpleChange:
 		goto changeOutputType;
 	}
 	else if (b == MIDI) {
-		// AARON MOD: MIDI -> Live Audio Looper (Shift+MIDI = original MIDI)
+		// AARON MOD: MIDI -> New Audio Clip for live looping (Shift+MIDI = original MIDI)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::MIDI_OUT;
 				goto changeOutputType;
 			}
 			else {
-				// Create new audio clip set up for live looping from line in
+				if (inCardRoutine) return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
+				currentUIMode = UI_MODE_CREATING_CLIP;
 				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
-				setupTrackCreation();
+				clipCreationButtonPressed(deluge::hid::button::SELECT_ENC, true, inCardRoutine);
 			}
 		}
 	}
 	else if (b == CV) {
-		// AARON MOD: CV -> New Audio Clip (Shift+CV = original)
+		// AARON MOD: CV -> New Audio Clip for loading loops (Shift+CV = original)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::CV;
 				goto changeOutputType;
 			}
 			else {
+				if (inCardRoutine) return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
+				currentUIMode = UI_MODE_CREATING_CLIP;
 				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
-				setupTrackCreation();
+				clipCreationButtonPressed(deluge::hid::button::SELECT_ENC, true, inCardRoutine);
 			}
 		}
 	}
