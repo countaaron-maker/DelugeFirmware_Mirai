@@ -250,8 +250,8 @@ static_assert(NUM_PRESET_SCALES <= 16);
 bool accessibilityShortcuts = false;
 MenuHighlighting accessibilityMenuHighlighting = MenuHighlighting::FULL_INVERSION;
 
-OutputType defaultNewClipType = OutputType::SYNTH;
-bool defaultUseLastClipType = true;
+OutputType defaultNewClipType = OutputType::AUDIO;
+bool defaultUseLastClipType = false;
 
 ThresholdRecordingMode defaultThresholdRecordingMode = ThresholdRecordingMode::OFF;
 

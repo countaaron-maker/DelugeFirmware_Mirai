@@ -670,11 +670,8 @@ doActualSimpleChange:
 				goto changeOutputType;
 			}
 			else {
-				// Enter audio clip creation mode - press any pad to place the clip
-				lastTypeCreated = OutputType::AUDIO;
 				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
-				currentUIMode = UI_MODE_CREATING_CLIP;
-				display->displayPopup("AUDIO CLIP");
+				setupTrackCreation();
 			}
 		}
 	}
@@ -686,11 +683,8 @@ doActualSimpleChange:
 				goto changeOutputType;
 			}
 			else {
-				// Enter audio clip creation mode - press any pad to place the clip
-				lastTypeCreated = OutputType::AUDIO;
 				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
-				currentUIMode = UI_MODE_CREATING_CLIP;
-				display->displayPopup("AUDIO CLIP");
+				setupTrackCreation();
 			}
 		}
 	}
