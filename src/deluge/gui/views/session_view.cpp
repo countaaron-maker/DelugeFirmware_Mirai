@@ -670,35 +670,27 @@ doActualSimpleChange:
 				goto changeOutputType;
 			}
 			else {
-				if (inCardRoutine) return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
-				int32_t yDisplay = (selectedClipYDisplay < kDisplayHeight) ? selectedClipYDisplay
-				                   : std::min((int32_t)currentSong->sessionClips.getNumElements(),
-				                              (int32_t)kDisplayHeight - 1);
-				Clip* newClip = createNewClip(OutputType::AUDIO, yDisplay);
-				if (newClip) {
-					display->displayPopup("AUDIO CLIP");
-					requestRendering(this, 0xFFFFFFFF, 0xFFFFFFFF);
-				}
+				// Enter audio clip creation mode - press any pad to place the clip
+				lastTypeCreated = OutputType::AUDIO;
+				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
+				currentUIMode = UI_MODE_CREATING_CLIP;
+				display->displayPopup("AUDIO CLIP");
 			}
 		}
 	}
 	else if (b == CV) {
-		// AARON MOD: CV -> New Audio Clip instantly (Shift+CV = original)
+		// AARON MOD: CV -> New Audio Clip (Shift+CV = original)
 		if (on) {
 			if (Buttons::isShiftButtonPressed()) {
 				newOutputType = OutputType::CV;
 				goto changeOutputType;
 			}
 			else {
-				if (inCardRoutine) return ActionResult::REMIND_ME_OUTSIDE_CARD_ROUTINE;
-				int32_t yDisplay = (selectedClipYDisplay < kDisplayHeight) ? selectedClipYDisplay
-				                   : std::min((int32_t)currentSong->sessionClips.getNumElements(),
-				                              (int32_t)kDisplayHeight - 1);
-				Clip* newClip = createNewClip(OutputType::AUDIO, yDisplay);
-				if (newClip) {
-					display->displayPopup("AUDIO CLIP");
-					requestRendering(this, 0xFFFFFFFF, 0xFFFFFFFF);
-				}
+				// Enter audio clip creation mode - press any pad to place the clip
+				lastTypeCreated = OutputType::AUDIO;
+				context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
+				currentUIMode = UI_MODE_CREATING_CLIP;
+				display->displayPopup("AUDIO CLIP");
 			}
 		}
 	}
