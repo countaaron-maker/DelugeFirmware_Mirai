@@ -182,6 +182,15 @@ private:
 	bool insertAndResyncNewClip(Clip* newClip, int32_t yDisplay);
 	void resyncNewClip(Clip* newClip, ModelStackWithTimelineCounter* modelStackWithTimelineCounter);
 
+	// Mirai macros: pad+MIDI and pad+CV in song view trigger audio-clip creation plus a follow-up action.
+	enum class AudioClipMacro : uint8_t {
+		NONE,
+		PLAYER_BROWSE_LOOPS,      // MIDI: open sample browser at SAMPLES/Loops
+		RECORDER_STEREO_MONITOR,  // CV: arm stereo input with monitoring
+	};
+	AudioClipMacro pendingAudioClipMacro = AudioClipMacro::NONE;
+	void runPendingAudioClipMacro(Clip* clip);
+
 	// Members regarding rendering different layouts
 private:
 	void selectLayout(int8_t offset);

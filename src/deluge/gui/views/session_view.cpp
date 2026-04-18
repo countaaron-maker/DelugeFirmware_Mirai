@@ -28,6 +28,7 @@
 #include "gui/context_menu/stem_export/cancel_stem_export.h"
 #include "gui/menu_item/colour.h"
 #include "gui/ui/keyboard/keyboard_screen.h"
+#include "gui/ui/browser/sample_browser.h"
 #include "gui/ui/load/load_instrument_preset_ui.h"
 #include "gui/ui/load/load_song_ui.h"
 #include "gui/ui/menus.h"
@@ -3942,6 +3943,17 @@ void SessionView::setupTrackCreation() const { // start clip creation, blink LED
 
 ActionResult SessionView::clipCreationButtonPressed(hid::Button i, bool on, bool routine) {
 	using namespace deluge::hid::button;
+
+	// Mirai remap: pad+MIDI and pad+CV create an Audio clip plus a follow-up macro.
+	// Shift escape hatch falls through to the default mapping (MIDI_OUT / CV).
+	if (on && !Buttons::isShiftButtonPressed() && (i == MIDI || i == CV)) {
+		context_menu::clip_settings::newClipType.toCreate = OutputType::AUDIO;
+		pendingAudioClipMacro = (i == MIDI) ? AudioClipMacro::PLAYER_BROWSE_LOOPS
+		                                    : AudioClipMacro::RECORDER_STEREO_MONITOR;
+		exitTrackCreation();
+		return ActionResult::ACTIONED_AND_CAUSED_CHANGE;
+	}
+
 	OutputType toCreate = buttonToOutputType(i);
 	if (toCreate != OutputType::NONE) {
 		context_menu::clip_settings::newClipType.toCreate = toCreate;
@@ -3965,6 +3977,35 @@ void SessionView::exitTrackCreation() {
 	indicator_leds::setLedState(IndicatorLED::BACK, false, false);
 	exitUIMode(UI_MODE_CREATING_CLIP);
 	requestRendering(&sessionView);
+}
+
+// Mirai: run the follow-up action queued by the pad+MIDI or pad+CV remap.
+// Called from gridHandlePadsLaunch right after the new AudioClip has been created
+// and set as current. Must only be called with a non-null AudioClip.
+void SessionView::runPendingAudioClipMacro(Clip* clip) {
+	AudioClip* audioClip = (AudioClip*)clip;
+	AudioOutput* audioOutput = (AudioOutput*)audioClip->output;
+
+	// CV: configure the track to record stereo line input with monitoring.
+	// Playback will auto-arm via AudioClip::beginLinearRecording() when the user hits play.
+	if (pendingAudioClipMacro == AudioClipMacro::RECORDER_STEREO_MONITOR) {
+		audioOutput->inputChannel = AudioInputChannel::STEREO;
+		audioOutput->echoing = true;
+	}
+
+	// Jump from session view into the audio clip view. For a freshly-created clip with no
+	// sample yet, this is synchronous (changeRootUI to audioClipView) — safe to chain another
+	// openUI() below.
+	transitionToViewForClip(clip);
+
+	// MIDI: open the sample browser rooted at SAMPLES/Loops. The trailing slash makes
+	// SampleBrowser::opened()'s path-dissection land on that folder with no file pre-selected.
+	if (pendingAudioClipMacro == AudioClipMacro::PLAYER_BROWSE_LOOPS) {
+		sampleBrowser.lastFilePathLoaded.set("SAMPLES/Loops/");
+		if (soundEditor.setup(clip)) {
+			openUI(&sampleBrowser);
+		}
+	}
 }
 
 ActionResult SessionView::gridHandlePadsLaunch(int32_t x, int32_t y, int32_t on, Clip* clip) {
@@ -4051,6 +4092,16 @@ ActionResult SessionView::gridHandlePadsLaunch(int32_t x, int32_t y, int32_t on,
 				if (clip != nullptr) {
 					currentSong->setCurrentClip(clip);
 
+					// Mirai: if pad+MIDI or pad+CV was used, run the macro and bail before
+					// entering UI_MODE_CLIP_PRESSED_IN_SONG_VIEW (we're leaving session view entirely).
+					if (pendingAudioClipMacro != AudioClipMacro::NONE && clip->type == ClipType::AUDIO) {
+						runPendingAudioClipMacro(clip);
+						pendingAudioClipMacro = AudioClipMacro::NONE;
+						gridFirstPressedX = -1;
+						gridFirstPressedY = -1;
+						return ActionResult::ACTIONED_AND_CAUSED_CHANGE;
+					}
+
 					// Allow clip control (selection) if still holding it
 					if (x == gridFirstPressedX && y == gridFirstPressedY) {
 						currentUIMode = UI_MODE_CLIP_PRESSED_IN_SONG_VIEW;
@@ -4061,6 +4112,10 @@ ActionResult SessionView::gridHandlePadsLaunch(int32_t x, int32_t y, int32_t on,
 						// if midi follow feedback is enabled, it sends feedback for the right clip
 						view.setActiveModControllableTimelineCounter(clip);
 					}
+				}
+				else {
+					// Clip creation failed; don't leave a pending macro to fire next time.
+					pendingAudioClipMacro = AudioClipMacro::NONE;
 				}
 
 				return ActionResult::ACTIONED_AND_CAUSED_CHANGE;
